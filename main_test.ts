@@ -28,7 +28,7 @@ describe("PicoEventStoreImpl", () => {
     );
     assertEquals(
       JSON.stringify(appendToStreamResult.extract()),
-      `{"key":"${streamName}","value":[{"type":"TestedIt"}]}`,
+      `[{"type":"TestedIt"}]`,
     );
     assertEquals(checkFileExists(`${sp}/${streamName}.json`), true);
     assertEquals(PicoEventStoreImpl().getStreamVersion(streamName), Right(1));
@@ -43,7 +43,7 @@ describe("PicoEventStoreImpl", () => {
     );
     assertEquals(
       JSON.stringify(appendToStreamResult.extract()),
-      `{"key":"${streamName}","value":[{"type":"TestedItOne"}]}`,
+      `[{"type":"TestedItOne"}]`,
     );
     const appendToStreamResult2 = PicoEventStoreImpl().appendToStream(
       streamName,
@@ -53,7 +53,7 @@ describe("PicoEventStoreImpl", () => {
     );
     assertEquals(
       JSON.stringify(appendToStreamResult2.extract()),
-      `{"key":"${streamName}","value":[{"type":"TestedItOne"},{"type":"TestedItTwo"}]}`,
+      `[{"type":"TestedItOne"},{"type":"TestedItTwo"}]`,
     );
     assertEquals(
       PicoEventStoreImpl().readStream(streamName),
@@ -62,6 +62,6 @@ describe("PicoEventStoreImpl", () => {
     assertEquals(PicoEventStoreImpl().getStreamVersion(streamName), Right(2));
   });
   it("cleans itself up", () => {
-    readdirSync(sp).forEach(f => rmSync(`${sp}/${f}`));
+    readdirSync(sp).forEach((f) => rmSync(`${sp}/${f}`));
   });
 });

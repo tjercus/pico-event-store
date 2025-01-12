@@ -1,5 +1,5 @@
 import { FSDB, FSDBError } from "npm:file-system-db@2.1.0";
-import { Either, Left, Right } from "npm:purify-ts@2.1.0";
+import { type Either, Left, Right } from "npm:purify-ts@2.1.0";
 
 export type PicoEventStore = {
   appendToStream: <T>(
@@ -14,7 +14,9 @@ export type PicoEventStore = {
 /**
  * Simplest implementation of an Event Store using file-system-db
  */
-const PicoEventStoreImpl = (storageDir: string = "storage"): PicoEventStore => ({
+const PicoEventStoreImpl = (
+  storageDir: string = "storage",
+): PicoEventStore => ({
   appendToStream: <T>(streamName: string, event: T) => {
     try {
       const db = new FSDB(`./${storageDir}/${streamName}.json`, false);
@@ -22,7 +24,7 @@ const PicoEventStoreImpl = (storageDir: string = "storage"): PicoEventStore => (
         PicoEventStoreImpl().createStream(streamName);
       }
       db.push(streamName, event);
-      return Right(db.getAll()[0] as unknown as Array<T>);
+      return Right(db.getAll()[0].value as unknown as Array<T>);
     } catch (ex: unknown) {
       return Left(ex as FSDBError);
     }
@@ -31,7 +33,7 @@ const PicoEventStoreImpl = (storageDir: string = "storage"): PicoEventStore => (
     try {
       const db = new FSDB(`./${storageDir}/${streamName}.json`, false);
       db.set(streamName, []);
-      return Right(db.getAll()[0] as unknown as Array<T>);
+      return Right(db.getAll()[0].value as unknown as Array<T>);
     } catch (ex: unknown) {
       return Left(ex as FSDBError);
     }
@@ -47,7 +49,10 @@ const PicoEventStoreImpl = (storageDir: string = "storage"): PicoEventStore => (
   readStream: <T>(streamName: string) => {
     try {
       const db = new FSDB(`./${storageDir}/${streamName}.json`, false);
-      return Right(db.get(streamName) as unknown as Array<T>);
+      const arr = db.get(streamName);
+      return Array.isArray(arr) ? Right(arr as unknown as Array<T>) : Left(
+        new FSDBError({ message: "Stream not found", method: "readStream" }),
+      );
     } catch (ex: unknown) {
       return Left(ex as FSDBError);
     }
